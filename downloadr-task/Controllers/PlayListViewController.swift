@@ -12,10 +12,8 @@ class PlayListViewController: UIViewController {
         let title: String?
         let album: String?
         var url: String?
-//        var isDownloading: Bool?
-        
+                
     }
-    
     
     
     var trackListTableView = UITableView()
@@ -29,12 +27,13 @@ class PlayListViewController: UIViewController {
         
         print("ViewDidLoad")
         
-        view.backgroundColor = .white
+        view.backgroundColor = .clear
+        
         
         configureNavBar()
         setupTrackListTableView()
-        getTrackList()
-
+        getTrackListToShowInTableView()
+        
         
     }
     
@@ -55,11 +54,11 @@ class PlayListViewController: UIViewController {
         // Создание и настройка элемента навигационной панели
         let navigationItem = UINavigationItem(title: "Downloadr")
         
-        navigationBar.barTintColor = UIColor(red: 41/255, green: 42/255, blue: 47/255, alpha: 1.0)
+//        navigationBar.barTintColor = UIColor(red: 41/255, green: 42/255, blue: 47/255, alpha: 1.0)
         
         
-//         MARK: Dar play theme:
-//       navigationBar.barTintColor = UIColor(red: 233/255, green: 51/255, blue: 69/255, alpha: 1.0)
+//                 MARK: Dar Play theme:
+               navigationBar.barTintColor = UIColor(red: 233/255, green: 51/255, blue: 69/255, alpha: 1.0)
         
         // Создание атрибутов титульной надписи
         
@@ -77,6 +76,8 @@ class PlayListViewController: UIViewController {
     }
     
     
+    // MARK: готовит TableView
+    
     func setupTrackListTableView() {
         
         view.addSubview(trackListTableView)
@@ -85,7 +86,7 @@ class PlayListViewController: UIViewController {
         trackListTableView.delegate = self
         trackListTableView.dataSource = self
         trackListTableView.register(TrackTableViewCell.self, forCellReuseIdentifier: identifier)
-
+        
         
         
         trackListTableView.snp.makeConstraints { make in
@@ -101,7 +102,10 @@ class PlayListViewController: UIViewController {
         
     }
     
-    func getTrackList() {
+    
+    // MARK: отображает на экране список треков, спаршенный из json
+    
+    func getTrackListToShowInTableView() {
         let url = URL(string: "https://vibze.github.io/downloadr-task/tracks.json")!
         AF.request(url).responseDecodable(of: [String: [Track]].self) { response in
             switch response.result {
@@ -111,14 +115,17 @@ class PlayListViewController: UIViewController {
                     self.trackListTableView.reloadData()
                     print("SUCCESS: TrackList was got succesfull")
                 }
-
+                
             case .failure(let error):
                 print("Error getting track list: \(error)")
             }
         }
+        
     }
+    
 }
-
+   
+    
 
 
 extension PlayListViewController: UITableViewDelegate, UITableViewDataSource {
@@ -131,8 +138,10 @@ extension PlayListViewController: UITableViewDelegate, UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as! TrackTableViewCell
         let track = tracks[indexPath.row]
         cell.configure(with: track)
+        cell.track?.url = track.url
+        
         return cell
     }
     
-    
 }
+
